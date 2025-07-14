@@ -1,0 +1,44 @@
+name: Deploy Lambda to AWS
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        aws-access-key-id: ${{ secrets.ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
+        aws-region: ap-south-1  
+
+    - name: Package Lambda
+      run: |
+        aws cloudformation package \
+          --template-file template.yaml \
+          --s3-bucket ceportal-package-storage \
+          --s3-prefix auth-api \
+          --region ap-south-1 \
+          --output-template-file packaged.yaml
+
+    - name: Deploy Lambda
+      run: |
+        aws cloudformation deploy \
+          --template-file packaged.yaml \
+          --stack-name ceportal-auth-stack \
+          --region ap-south-1 \
+          --debug \
+          --capabilities CAPABILITY_IAM
+          

@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  LoginApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: ceportal-auth-api
+      StageName: prod
+      Cors:
+        AllowMethods: "'POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+        AllowOrigin: "'*'"
+
+  LoginFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ceportal-auth
+      Handler: login.handler
+      Runtime: nodejs18.x
+      CodeUri: .
+      MemorySize: 128
+      Timeout: 10
+      Environment:
+        Variables:
+          USER_POOL_ID: ap-south-1_B6chGHjU9
+          CLIENT_ID: 1j83d3t7j19vdmd65m823332h0
+      Policies:
+        - AmazonCognitoReadOnly
+      Events:
+        LoginApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref LoginApiGateway
+            Path: /login
+            Method: POST
+              
