@@ -16,7 +16,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: ceportal-auth
-      Handler: login.handler
+      Handler: app.handler
       Runtime: nodejs18.x
       CodeUri: .
       MemorySize: 128
